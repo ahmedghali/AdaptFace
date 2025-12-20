@@ -131,7 +131,8 @@ def main():
         # Create validation dataloader
         print(f"\nLoading validation data from: {val_path}")
         val_dataset = ValidationPairDataset(
-            str(val_path),
+            data_dir=str(val_path),
+            dataset_name='lfw',
             transform=get_val_transforms()
         )
         # Use num_workers=0 for validation on Windows to avoid multiprocessing issues
@@ -147,7 +148,7 @@ def main():
     # Create training dataloader
     print(f"\nLoading training data from: {train_path}")
     train_dataset = CASIAWebFaceFromList(
-        str(train_path),
+        data_dir=str(train_path),
         transform=get_train_transforms(),
         max_samples=args.max_samples
     )
