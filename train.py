@@ -6,7 +6,9 @@ Train face recognition model with LoRA on CASIA-WebFace.
 
 import argparse
 import torch
+import platform
 from pathlib import Path
+from multiprocessing import freeze_support
 
 from src.models import FaceRecognitionModel
 from src.losses import CosFaceLoss
@@ -132,11 +134,13 @@ def main():
             str(val_path),
             transform=get_val_transforms()
         )
+        # Use num_workers=0 for validation on Windows to avoid multiprocessing issues
+        val_num_workers = 0 if platform.system() == 'Windows' else config.num_workers
         val_loader = DataLoader(
             val_dataset,
             batch_size=config.val_batch_size,
             shuffle=False,
-            num_workers=config.num_workers,
+            num_workers=val_num_workers,
             pin_memory=True
         )
 
@@ -151,11 +155,13 @@ def main():
     config.num_classes = train_dataset.num_classes
     print(f"Training dataset: {len(train_dataset):,} samples, {config.num_classes} classes")
 
+    # Reduce workers on Windows to avoid multiprocessing issues
+    train_num_workers = min(config.num_workers, 2) if platform.system() == 'Windows' else config.num_workers
     train_loader = DataLoader(
         train_dataset,
         batch_size=config.batch_size,
         shuffle=True,
-        num_workers=config.num_workers,
+        num_workers=train_num_workers,
         pin_memory=True,
         drop_last=True
     )
@@ -198,4 +204,5 @@ def main():
 
 
 if __name__ == '__main__':
+    freeze_support()  # Required for Windows multiprocessing
     main()
