@@ -1,0 +1,33 @@
+# PyTorch (install separately based on CUDA version)
+# See: https://pytorch.org/get-started/locally/
+torch>=2.0.0
+torchvision>=0.15.0
+
+# Foundation models
+transformers>=4.30.0
+timm>=0.9.0
+
+# LoRA / Parameter-efficient fine-tuning
+peft>=0.5.0
+
+# Data processing
+numpy>=1.24.0
+pandas>=2.0.0
+opencv-python>=4.8.0
+Pillow>=10.0.0
+
+# ML tools
+scipy>=1.11.0
+scikit-learn>=1.3.0
+
+# Visualization
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# Experiment tracking
+wandb>=0.15.0
+tensorboard>=2.14.0
+
+# Face detection (optional, for preprocessing)
+# insightface>=0.7.3
+# onnxruntime-gpu>=1.15.0
