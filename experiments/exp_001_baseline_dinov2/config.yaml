@@ -1,0 +1,64 @@
+# Experiment 001: Baseline DINOv2 + LoRA
+# Date: 2024-12-20
+# Duration: 17.91 hours
+
+experiment:
+  id: "exp_001"
+  name: "baseline_dinov2"
+  description: "Baseline training with DINOv2 ViT-S backbone and standard LoRA"
+  date_start: "2024-12-20 16:50:23"
+  date_end: "2024-12-21 10:45:00"
+  duration_hours: 17.91
+  wandb_run: "hvkjx93t"
+  wandb_url: "https://wandb.ai/ghali-ahmed/AdaptFace/runs/hvkjx93t"
+
+model:
+  backbone: "dinov2"
+  backbone_variant: "vit_small_patch14"
+  total_params: 22268288
+  trainable_params: 865664
+  trainable_percent: 3.89
+
+lora:
+  rank: 16
+  alpha: 16.0
+  dropout: 0.0
+  target_modules: ["qkv", "proj"]
+
+training:
+  epochs: 40
+  batch_size: 128
+  learning_rate: 0.0001
+  weight_decay: 0.05
+  optimizer: "AdamW"
+  scheduler: "CosineAnnealingLR"
+  mixed_precision: true
+
+loss:
+  type: "CosFace"
+  scale: 64.0
+  margin: 0.35
+
+data:
+  train_dataset: "CASIA-WebFace"
+  train_samples: 494149
+  train_identities: 10572
+  val_dataset: "LFW"
+  val_pairs: 6000
+  image_size: 224
+  augmentation: "RandAugment"
+
+hardware:
+  gpu: "RTX 4060 Laptop GPU"
+  gpu_memory: "8 GB"
+  cuda_version: "12.1"
+
+results:
+  best_accuracy: 90.45
+  final_accuracy: 90.28
+  best_auc: 0.9620
+  best_epoch: 33
+
+checkpoints:
+  best_model: "checkpoints/best_model.pt"
+  final_model: "checkpoints/final_model.pt"

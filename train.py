@@ -31,6 +31,14 @@ def parse_args():
     parser.add_argument('--no-lora', action='store_true',
                         help='Disable LoRA (full fine-tuning)')
 
+    # DA-LoRA (Domain-Aware LoRA)
+    parser.add_argument('--use-dalora', action='store_true',
+                        help='Enable Domain-Aware LoRA (DA-LoRA)')
+    parser.add_argument('--num-domains', type=int, default=3,
+                        help='Number of domains for DA-LoRA (default: 3)')
+    parser.add_argument('--domain-loss-weight', type=float, default=0.1,
+                        help='Weight for domain classification loss')
+
     # Training
     parser.add_argument('--batch-size', type=int, default=256,
                         help='Training batch size')
@@ -86,10 +94,15 @@ def main():
 
     # Set experiment name
     if args.name is None:
-        args.name = f"{args.backbone}_lora{args.lora_rank}_bs{args.batch_size}"
+        if args.use_dalora:
+            args.name = f"{args.backbone}_dalora{args.lora_rank}_d{args.num_domains}_bs{args.batch_size}"
+        else:
+            args.name = f"{args.backbone}_lora{args.lora_rank}_bs{args.batch_size}"
 
     print("\n" + "="*60)
     print("AdaptFace Training")
+    if args.use_dalora:
+        print(f"Mode: DA-LoRA ({args.num_domains} domains)")
     print("="*60)
 
     # Create config
@@ -98,6 +111,9 @@ def main():
         embedding_dim=args.embedding_dim,
         use_lora=not args.no_lora,
         lora_rank=args.lora_rank,
+        domain_aware=args.use_dalora,
+        num_domains=args.num_domains,
+        domain_loss_weight=args.domain_loss_weight,
         batch_size=args.batch_size,
         num_epochs=args.epochs,
         learning_rate=args.lr,
@@ -168,13 +184,19 @@ def main():
     )
 
     # Create model
-    print(f"\nCreating model: {config.backbone} with LoRA rank={config.lora_rank}")
+    if config.domain_aware:
+        print(f"\nCreating model: {config.backbone} with DA-LoRA (rank={config.lora_rank}, domains={config.num_domains})")
+    else:
+        print(f"\nCreating model: {config.backbone} with LoRA rank={config.lora_rank}")
+
     model = FaceRecognitionModel(
         backbone_type=config.backbone,
         num_classes=config.num_classes,
         embedding_dim=config.embedding_dim,
         use_lora=config.use_lora,
-        lora_rank=config.lora_rank
+        lora_rank=config.lora_rank,
+        domain_aware=config.domain_aware,
+        num_domains=config.num_domains
     )
 
     # Create loss

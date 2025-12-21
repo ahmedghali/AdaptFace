@@ -39,6 +39,11 @@ class TrainingConfig:
     use_lora: bool = True
     lora_rank: int = 16
 
+    # DA-LoRA (Domain-Aware LoRA)
+    domain_aware: bool = False
+    num_domains: int = 3
+    domain_loss_weight: float = 0.1
+
     # Training
     batch_size: int = 512
     num_epochs: int = 40

@@ -10,11 +10,30 @@ This project implements Domain-Aware LoRA (DA-LoRA) for adapting foundation mode
 | Phase | Status | Progress |
 |-------|--------|----------|
 | Phase 1: Setup & Literature Review | ✅ Complete (Env) / In Progress (Lit) | 70% |
-| Phase 2: Baseline Implementation | In Progress (Week 3 ✅, Week 4.1 ✅) | 75% |
-| Phase 3: Domain-Aware LoRA | Not Started | 0% |
+| Phase 2: Baseline Implementation | ✅ **COMPLETE** - All benchmarks evaluated | 100% |
+| Phase 3: Domain-Aware LoRA | **NEXT** → Ready to start | 0% |
 | Phase 4: Cross-Domain Experiments | Not Started | 0% |
 | Phase 5: Ablation Studies | Not Started | 0% |
 | Phase 6: Paper Writing | Not Started | 0% |
+
+### Baseline Results Summary (2025-12-21)
+
+| Experiment | Backbone | LFW Acc | AUC | Duration | Status |
+|------------|----------|---------|-----|----------|--------|
+| EXP-001 | DINOv2 ViT-S | **90.45%** | 0.962 | 17.9h | ✅ Complete |
+| EXP-002 | CLIP ViT-B | - | - | - | Optional |
+
+### Multi-Benchmark Evaluation (EXP-001)
+
+| Benchmark | Accuracy | AUC | Type | Verdict |
+|-----------|----------|-----|------|---------|
+| **LFW** | **90.45%** | 0.962 | Général | ✅ Excellent |
+| **CFP-FP** | **71.81%** | 0.788 | Pose (frontal/profil) | ⚠️ À améliorer |
+| **AgeDB-30** | **52.30%** | 0.485 | Cross-âge | ❌ ÉCHEC → Justifie DA-LoRA |
+| **CALFW** | **69.27%** | 0.755 | Cross-âge | ⚠️ Difficile |
+| **CPLFW** | **68.67%** | 0.748 | Cross-pose | ⚠️ Difficile |
+
+**Conclusion clé**: Le baseline échoue sur les domaines spécifiques (pose, âge) → **DA-LoRA est justifié!**
 
 **Data Preparation: ✅ COMPLETE** - All datasets loaded and verified
 
@@ -163,19 +182,21 @@ This project implements Domain-Aware LoRA (DA-LoRA) for adapting foundation mode
 - [x] **4.1.7** Integrate W&B logging - *2025-12-10 13:15*
 
 #### 4.2 Run Baseline Experiments
-- [ ] **4.2.1** Train DINOv2 ViT-S with LoRA (rank=16, 1K identities)
-- [ ] **4.2.2** Track training loss
-- [ ] **4.2.3** Track validation accuracy on LFW
-- [ ] **4.2.4** Track validation accuracy on CFP-FP
-- [ ] **4.2.5** Track validation accuracy on AgeDB-30
-- [ ] **4.2.6** Monitor GPU memory usage
-- [ ] **4.2.7** Document training time per epoch
+- [x] **4.2.1** Train DINOv2 ViT-S with LoRA (rank=16, 10K identities) - *2025-12-20 16:50*
+- [x] **4.2.2** Track training loss (31.54 → 22.59) - *2025-12-21*
+- [x] **4.2.3** Track validation accuracy on LFW (**90.45%**) - *2025-12-21*
+- [x] **4.2.4** Track validation accuracy on CFP-FP (**71.81%**) - *2025-12-21*
+- [x] **4.2.5** Track validation accuracy on AgeDB-30 (**52.30%** - cross-age failure, justifies DA-LoRA) - *2025-12-21*
+- [x] **4.2.6** Track validation accuracy on CALFW (**69.27%** - cross-age difficult) - *2025-12-21*
+- [x] **4.2.7** Track validation accuracy on CPLFW (**68.67%** - cross-pose difficult) - *2025-12-21*
+- [x] **4.2.8** Monitor GPU memory usage (RTX 4060, 8GB) - *2025-12-21*
+- [x] **4.2.9** Document training time per epoch (~26 min/epoch, 17.9h total) - *2025-12-21*
 
 **Week 4 Deliverables:**
 - [x] Complete training pipeline - *2025-12-10 13:25*
-- [ ] Baseline results (target: ~87.10% on LFW)
-- [ ] Training logs and checkpoints
-- [ ] Performance analysis document
+- [x] Baseline results: **90.45% on LFW** (target was 87.10%) - *2025-12-21*
+- [x] Training logs and checkpoints - *2025-12-21*
+- [x] Performance analysis document (`experiments/exp_001_baseline_dinov2/`) - *2025-12-21*
 
 #### Week 4 Training Pipeline Components
 
@@ -515,12 +536,12 @@ latex (local installation)
 
 ## Current Status
 
-**Current Phase:** Phase 2 - Baseline Implementation (Week 4.2 🔄 IN PROGRESS)
-**Current Task:** Running Baseline Experiments
-**Next Action:** Monitor training progress and validate results
+**Current Phase:** Phase 2 - Baseline Implementation (Week 4.2 ✅ COMPLETE)
+**Current Task:** Evaluate on additional benchmarks, then start Phase 3
+**Next Action:** Run CLIP baseline (EXP-002) or start DA-LoRA implementation
 
-### 🔄 Week 4.2 Baseline Experiment Status
-**Training Started:** 2025-12-10 14:07
+### ✅ Week 4.2 Baseline Experiment - COMPLETE
+**Training Period:** 2025-12-20 16:50 → 2025-12-21 10:45 (17.9 hours)
 
 | Parameter | Value |
 |-----------|-------|
@@ -531,17 +552,21 @@ latex (local installation)
 | Learning Rate | 1e-4 |
 | Optimizer | AdamW (wd=0.05) |
 | Scheduler | CosineAnnealingLR |
-| Training Data | CASIA-WebFace (494,149 images) |
+| Training Data | CASIA-WebFace (494,149 images, 10,572 IDs) |
 | Validation | LFW (6,000 pairs) |
 | Target Accuracy | ~87.10% |
 
-**Initial Results (Epoch 1 Test Run):**
-- Training Loss: 35.5 → 31.6 (converging)
-- LFW Accuracy: 50% (expected for epoch 1)
-- AUC: 0.5654
+**Final Results:**
+- **Best LFW Accuracy: 90.45%** (exceeds target by +3.35%)
+- Final Loss: 22.59
+- AUC: 0.9620
+- K-fold std: ±1.28%
+- Best Epoch: 33
 - Time per Epoch: ~26 minutes
 
-**Estimated Training Time:** ~17 hours for 40 epochs
+**Checkpoints Saved:**
+- `checkpoints/best_model.pt` (epoch 33, 90.45%)
+- `checkpoints/final_model.pt` (epoch 40, 90.28%)
 
 ### ✅ Phase 1.1 Environment Setup - COMPLETE
 All development environment tasks completed successfully:

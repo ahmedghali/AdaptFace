@@ -1,0 +1,15 @@
+{
+  "timestamp": "2025-12-21T12:31:51.027454",
+  "checkpoint": "checkpoints/best_model.pt",
+  "device": "cuda",
+  "benchmarks": {
+    "cplfw": {
+      "accuracy": 0.6866666666666666,
+      "accuracy_percent": 68.66666666666667,
+      "kfold_mean": 0.6851666666666667,
+      "kfold_std": 0.015355961564016621,
+      "auc": 0.7478462222222222,
+      "threshold": 0.1313131313131315
+    }
+  }
+}

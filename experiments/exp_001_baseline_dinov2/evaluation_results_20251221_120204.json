@@ -1,0 +1,15 @@
+{
+  "timestamp": "2025-12-21T12:02:04.880508",
+  "checkpoint": "checkpoints/best_model.pt",
+  "device": "cuda",
+  "benchmarks": {
+    "agedb-30": {
+      "accuracy": 0.523,
+      "accuracy_percent": 52.300000000000004,
+      "kfold_mean": 0.523,
+      "kfold_std": 0.0206397674405503,
+      "auc": 0.48482533333333333,
+      "threshold": 0.030303030303030498
+    }
+  }
+}
