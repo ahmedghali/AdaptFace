@@ -28,6 +28,10 @@ def parse_args():
                         help='Embedding dimension')
     parser.add_argument('--lora-rank', type=int, default=16,
                         help='LoRA rank')
+    parser.add_argument('--lora-alpha', type=float, default=None,
+                        help='LoRA alpha scaling (default: 2x rank)')
+    parser.add_argument('--warmup-epochs', type=int, default=5,
+                        help='Learning rate warmup epochs')
     parser.add_argument('--no-lora', action='store_true',
                         help='Disable LoRA (full fine-tuning)')
 
@@ -92,6 +96,10 @@ def parse_args():
 def main():
     args = parse_args()
 
+    # Set lora_alpha default (2x rank)
+    if args.lora_alpha is None:
+        args.lora_alpha = args.lora_rank * 2.0
+
     # Set experiment name
     if args.name is None:
         if args.use_dalora:
@@ -111,6 +119,7 @@ def main():
         embedding_dim=args.embedding_dim,
         use_lora=not args.no_lora,
         lora_rank=args.lora_rank,
+        lora_alpha=args.lora_alpha,
         domain_aware=args.use_dalora,
         num_domains=args.num_domains,
         domain_loss_weight=args.domain_loss_weight,
@@ -118,6 +127,7 @@ def main():
         num_epochs=args.epochs,
         learning_rate=args.lr,
         weight_decay=args.weight_decay,
+        warmup_epochs=args.warmup_epochs,
         cosface_margin=args.margin,
         cosface_scale=args.scale,
         train_data_dir=args.train_data,
@@ -185,9 +195,10 @@ def main():
 
     # Create model
     if config.domain_aware:
-        print(f"\nCreating model: {config.backbone} with DA-LoRA (rank={config.lora_rank}, domains={config.num_domains})")
+        print(f"\nCreating model: {config.backbone} with DA-LoRA (rank={config.lora_rank}, alpha={config.lora_alpha}, domains={config.num_domains})")
     else:
-        print(f"\nCreating model: {config.backbone} with LoRA rank={config.lora_rank}")
+        print(f"\nCreating model: {config.backbone} with LoRA (rank={config.lora_rank}, alpha={config.lora_alpha})")
+    print(f"Warmup: {config.warmup_epochs} epochs")
 
     model = FaceRecognitionModel(
         backbone_type=config.backbone,
@@ -195,6 +206,7 @@ def main():
         embedding_dim=config.embedding_dim,
         use_lora=config.use_lora,
         lora_rank=config.lora_rank,
+        lora_alpha=config.lora_alpha,
         domain_aware=config.domain_aware,
         num_domains=config.num_domains
     )

@@ -63,8 +63,15 @@ def load_model(checkpoint_path: str, device: torch.device) -> nn.Module:
     backbone_name = config.get('backbone', 'dinov2')
     lora_rank = config.get('lora_rank', 16)
 
+    # Check if this is a DA-LoRA model
+    domain_aware = config.get('domain_aware', False)
+    num_domains = config.get('num_domains', 3)
+
     print(f"  Backbone: {backbone_name}")
     print(f"  LoRA rank: {lora_rank}")
+    print(f"  Domain-aware (DA-LoRA): {domain_aware}")
+    if domain_aware:
+        print(f"  Num domains: {num_domains}")
 
     # Create full model with same config as training
     model = FaceRecognitionModel(
@@ -74,7 +81,9 @@ def load_model(checkpoint_path: str, device: torch.device) -> nn.Module:
         use_lora=True,
         lora_rank=lora_rank,
         lora_alpha=float(lora_rank),
-        lora_target_modules=['qkv', 'proj']
+        lora_target_modules=['qkv', 'proj'],
+        domain_aware=domain_aware,
+        num_domains=num_domains
     )
 
     # Load weights
@@ -188,8 +197,11 @@ def main():
     if args.output:
         output_path = Path(args.output)
     else:
+        # Default: save to evaluation/ folder
+        eval_dir = Path("evaluation")
+        eval_dir.mkdir(exist_ok=True)
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        output_path = Path(f"evaluation_results_{timestamp}.json")
+        output_path = eval_dir / f"evaluation_results_{timestamp}.json"
 
     # Prepare JSON-serializable results
     json_results = {

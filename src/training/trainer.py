@@ -9,7 +9,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from torch.optim.lr_scheduler import CosineAnnealingLR
+from torch.optim.lr_scheduler import CosineAnnealingLR, LambdaLR
+import math
 from typing import Optional, Dict, Any, List
 from pathlib import Path
 from dataclasses import dataclass, field
@@ -38,6 +39,7 @@ class TrainingConfig:
     embedding_dim: int = 512
     use_lora: bool = True
     lora_rank: int = 16
+    lora_alpha: float = None  # Default: 2x rank
 
     # DA-LoRA (Domain-Aware LoRA)
     domain_aware: bool = False
@@ -123,12 +125,8 @@ class Trainer:
             weight_decay=self.config.weight_decay
         )
 
-        # Scheduler
-        self.scheduler = CosineAnnealingLR(
-            self.optimizer,
-            T_max=self.config.num_epochs,
-            eta_min=1e-6
-        )
+        # Scheduler with warmup
+        self.scheduler = self._create_scheduler()
 
         # Mixed precision
         self.scaler = torch.amp.GradScaler('cuda') if self.config.mixed_precision else None
@@ -149,6 +147,24 @@ class Trainer:
 
         # Print training info
         self._print_training_info()
+
+    def _create_scheduler(self):
+        """Create scheduler with linear warmup + cosine decay."""
+        warmup_epochs = self.config.warmup_epochs
+        total_epochs = self.config.num_epochs
+
+        def lr_lambda(epoch):
+            if epoch < warmup_epochs:
+                # Linear warmup: 0 -> 1
+                return float(epoch + 1) / float(max(1, warmup_epochs))
+            else:
+                # Cosine decay: 1 -> eta_min/lr
+                progress = float(epoch - warmup_epochs) / float(max(1, total_epochs - warmup_epochs))
+                return max(1e-6 / self.config.learning_rate, 0.5 * (1.0 + math.cos(math.pi * progress)))
+
+        scheduler = LambdaLR(self.optimizer, lr_lambda)
+        print(f"Scheduler: Linear warmup ({warmup_epochs} epochs) + Cosine decay")
+        return scheduler
 
     def _setup_directories(self):
         """Create necessary directories."""

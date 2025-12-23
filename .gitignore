@@ -100,8 +100,9 @@ __archive__/
 claude_*.txt
 
 # Detailed status/roadmap (contains results)
-# STATUS.md
-# ROADMAP.md
+STATUS.md
+ROADMAP.md
+README.md
 
 # Test files revealing implementation
 tests/test_dalora.py
