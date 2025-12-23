@@ -69,3 +69,39 @@ credentials.json
 *.tmp
 *.temp
 *.log
+
+# ===========================================
+# SENSITIVE FILES - DO NOT TRACK
+# ===========================================
+
+# Core DA-LoRA implementation (innovation)
+src/models/da_lora.py
+src/models/face_model.py
+src/models/lora.py
+src/models/backbone.py
+src/models/__init__.py
+
+# Data loaders
+src/data/
+
+# Evaluation results
+evaluation/
+
+# DA-LoRA experiment results
+experiments/exp_003_dalora_dinov2/
+experiments/exp_004*/
+experiments/exp_005*/
+
+# Archive
+__archive__/
+
+# Private notes and prompts
+*prompt*.txt
+claude_*.txt
+
+# Detailed status/roadmap (contains results)
+# STATUS.md
+# ROADMAP.md
+
+# Test files revealing implementation
+tests/test_dalora.py
